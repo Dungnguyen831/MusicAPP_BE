@@ -5,35 +5,45 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "artists")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Artist {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
-    private String name;
+    @Column(nullable = false, unique = true, length = 150)
+    private String email;
 
-    @Column(nullable = false, unique = true, length = 180)
-    private String slug;
+    @Column(nullable = false, unique = true, length = 100)
+    private String username;
 
-    @Column(columnDefinition = "TEXT")
-    private String biography;
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "full_name", length = 150)
+    private String fullName;
+
+    @Column(length = 30)
+    private String phone;
 
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
-    @Column(length = 100)
-    private String country;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private ArtistStatus status = ArtistStatus.ACTIVE;
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
@@ -41,12 +51,6 @@ public class Artist {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -64,8 +68,7 @@ public class Artist {
         updatedAt = LocalDateTime.now();
     }
 
-    public enum ArtistStatus {
-        ACTIVE, INACTIVE
+    public enum UserStatus {
+        ACTIVE, INACTIVE, BANNED, PENDING_VERIFICATION
     }
 }
-

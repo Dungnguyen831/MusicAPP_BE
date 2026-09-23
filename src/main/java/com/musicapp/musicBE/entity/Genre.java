@@ -5,35 +5,32 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "artists")
+@Table(name = "genres")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Artist {
+public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 180)
+    @Column(nullable = false, unique = true, length = 120)
     private String slug;
 
     @Column(columnDefinition = "TEXT")
-    private String biography;
+    private String description;
 
-    @Column(name = "avatar_url", columnDefinition = "TEXT")
-    private String avatarUrl;
-
-    @Column(length = 100)
-    private String country;
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private ArtistStatus status = ArtistStatus.ACTIVE;
+    private GenreStatus status = GenreStatus.ACTIVE;
 
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
@@ -41,12 +38,6 @@ public class Artist {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -64,8 +55,7 @@ public class Artist {
         updatedAt = LocalDateTime.now();
     }
 
-    public enum ArtistStatus {
+    public enum GenreStatus {
         ACTIVE, INACTIVE
     }
 }
-

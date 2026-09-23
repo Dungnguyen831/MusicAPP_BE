@@ -2,72 +2,51 @@ package com.musicapp.musicBE.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "songs")
+@Table(name = "playlists")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Song {
+public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, unique = true, length = 230)
+    @Column(length = 230)
     private String slug;
 
-    @Column(name = "album_id")
-    private Long albumId;
-
-    @Column(name = "duration_seconds", nullable = false)
-    @Builder.Default
-    private Integer durationSeconds = 0;
-
-    @Column(name = "audio_url", nullable = false, columnDefinition = "TEXT")
-    private String audioUrl;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "cover_image_url", columnDefinition = "TEXT")
     private String coverImageUrl;
 
-    @Column(name = "file_size_bytes")
-    private Long fileSizeBytes;
-
-    @Column(name = "mime_type", length = 100)
-    @Builder.Default
-    private String mimeType = "audio/mpeg";
-
-    @Column(name = "bitrate")
-    private Integer bitrate;
-
-    @Column(name = "release_date")
-    private LocalDate releaseDate;
-
-    @Column(name = "play_count", nullable = false)
-    @Builder.Default
-    private Long playCount = 0L;
-
-    @Column(name = "like_count", nullable = false)
-    @Builder.Default
-    private Long likeCount = 0L;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private SongStatus status = SongStatus.DRAFT;
+    private PlaylistVisibility visibility = PlaylistVisibility.PRIVATE;
 
-    @Column(name = "is_vip_only", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "playlist_type", nullable = false)
     @Builder.Default
-    private Boolean isVipOnly = false;
+    private PlaylistType playlistType = PlaylistType.USER_CREATED;
 
-    @Column(name = "is_downloadable", nullable = false)
+    @Column(name = "total_songs", nullable = false)
     @Builder.Default
-    private Boolean isDownloadable = false;
+    private Integer totalSongs = 0;
+
+    @Column(name = "total_duration_seconds", nullable = false)
+    @Builder.Default
+    private Long totalDurationSeconds = 0L;
 
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
@@ -98,8 +77,11 @@ public class Song {
         updatedAt = LocalDateTime.now();
     }
 
-    public enum SongStatus {
-        DRAFT, PUBLISHED, HIDDEN, BLOCKED
+    public enum PlaylistVisibility {
+        PUBLIC, PRIVATE, UNLISTED
+    }
+
+    public enum PlaylistType {
+        USER_CREATED, SYSTEM, RECOMMENDED
     }
 }
-
