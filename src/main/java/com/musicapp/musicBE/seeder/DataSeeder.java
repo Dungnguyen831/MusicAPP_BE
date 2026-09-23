@@ -1,11 +1,7 @@
 package com.musicapp.musicBE.seeder;
 
-import com.musicapp.musicBE.entity.Artist;
-import com.musicapp.musicBE.entity.BannerItem;
-import com.musicapp.musicBE.entity.Song;
-import com.musicapp.musicBE.repository.ArtistRepository;
-import com.musicapp.musicBE.repository.BannerRepository;
-import com.musicapp.musicBE.repository.SongRepository;
+import com.musicapp.musicBE.entity.*;
+import com.musicapp.musicBE.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -26,118 +18,76 @@ public class DataSeeder implements CommandLineRunner {
     private final SongRepository songRepository;
     private final BannerRepository bannerRepository;
     private final ArtistRepository artistRepository;
+    private final GenreRepository genreRepository;
+    private final PlaylistRepository playlistRepository;
+    private final PlaylistSongRepository playlistSongRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
 
-    public DataSeeder(SongRepository songRepository, BannerRepository bannerRepository, ArtistRepository artistRepository) {
+    public DataSeeder(SongRepository songRepository, BannerRepository bannerRepository, 
+                      ArtistRepository artistRepository, GenreRepository genreRepository,
+                      PlaylistRepository playlistRepository, PlaylistSongRepository playlistSongRepository,
+                      UserRepository userRepository, RoleRepository roleRepository,
+                      UserRoleRepository userRoleRepository) {
         this.songRepository = songRepository;
         this.bannerRepository = bannerRepository;
         this.artistRepository = artistRepository;
+        this.genreRepository = genreRepository;
+        this.playlistRepository = playlistRepository;
+        this.playlistSongRepository = playlistSongRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Seed Artists
-        Artist kda = Artist.builder()
-                .name("K/DA")
-                .avatarUrl("https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&auto=format&fit=crop&q=60")
-                .bio("K/DA is a virtual K-pop girl group consisting of League of Legends champions.")
-                .build();
-
-        Artist weeknd = Artist.builder()
-                .name("The Weeknd")
-                .avatarUrl("https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=60")
-                .bio("Abel Makkonen Tesfaye, known professionally as the Weeknd, is a Canadian singer-songwriter.")
-                .build();
-
-        Artist postMalone = Artist.builder()
-                .name("Post Malone")
-                .avatarUrl("https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=60")
-                .bio("Austin Richard Post, known professionally as Post Malone, is an American rapper, singer, and songwriter.")
-                .build();
-
-        artistRepository.saveAll(List.of(kda, weeknd, postMalone));
-
-        // 2. Download sample MP3 for local stream demo if not exists
         downloadSampleMp3();
 
-        // 3. Seed Songs
-        // We use local stream URL: /api/v1/songs/{id}/stream
-        Song s1 = Song.builder()
-                .title("Aurora")
-                .artistName("K/DA")
-                .albumArtUrl("https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=60")
-                .audioUrl("/api/v1/songs/1/stream")
-                .duration(245)
-                .genre("K-Pop")
-                .isTrending(true)
-                .streamCount(1524300L)
-                .build();
+        if (userRepository.count() > 0) return;
 
-        Song s2 = Song.builder()
-                .title("The Baddest")
-                .artistName("K/DA")
-                .albumArtUrl("https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=60")
-                .audioUrl("/api/v1/songs/2/stream")
-                .duration(180)
-                .genre("K-Pop")
-                .isTrending(true)
-                .streamCount(2341900L)
-                .build();
+        Role userRole = roleRepository.save(Role.builder().name("ROLE_USER").description("User").build());
+        Role adminRole = roleRepository.save(Role.builder().name("ROLE_ADMIN").description("Admin").build());
 
-        Song s3 = Song.builder()
-                .title("POP/STARS")
-                .artistName("K/DA")
-                .albumArtUrl("https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=60")
-                .audioUrl("/api/v1/songs/3/stream")
-                .duration(191)
-                .genre("K-Pop")
-                .isTrending(true)
-                .streamCount(4981200L)
-                .build();
+        User admin = userRepository.save(User.builder()
+                .email("admin@musicapp.com").username("admin").passwordHash("hashed_pwd")
+                .fullName("System Admin").status(User.UserStatus.ACTIVE).emailVerified(true).build());
 
-        Song s4 = Song.builder()
-                .title("Circles Run")
-                .artistName("Post Malone")
-                .albumArtUrl("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=60")
-                .audioUrl("/api/v1/songs/4/stream")
-                .duration(215)
-                .genre("Pop")
-                .isTrending(false)
-                .streamCount(872100L)
-                .build();
+        User demoUser = userRepository.save(User.builder()
+                .email("user@musicapp.com").username("demo_user").passwordHash("hashed_pwd")
+                .fullName("Demo User").status(User.UserStatus.ACTIVE).emailVerified(true).build());
 
-        Song s5 = Song.builder()
-                .title("Blinding Lights")
-                .artistName("The Weeknd")
-                .albumArtUrl("https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&auto=format&fit=crop&q=60")
-                .audioUrl("/api/v1/songs/5/stream")
-                .duration(200)
-                .genre("Synthwave")
-                .isTrending(true)
-                .streamCount(9812300L)
-                .build();
+        userRoleRepository.save(new UserRole(admin.getId(), adminRole.getId(), LocalDateTime.now()));
+        userRoleRepository.save(new UserRole(demoUser.getId(), userRole.getId(), LocalDateTime.now()));
 
-        songRepository.saveAll(List.of(s1, s2, s3, s4, s5));
+        Genre pop = genreRepository.save(Genre.builder().name("Pop").slug("pop").description("Pop").build());
+        Genre edm = genreRepository.save(Genre.builder().name("EDM").slug("edm").description("EDM").build());
 
-        // 4. Seed Banners
-        BannerItem b1 = BannerItem.builder()
-                .title("Feel the Beat")
-                .subtitle("Dive into the trending tracks of this week")
-                .ctaText("Listen Now")
-                .backgroundImageUrl("https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=60")
-                .targetType("song")
-                .targetId(1L) // links to "Aurora"
-                .build();
+        artistRepository.save(Artist.builder().name("K/DA").slug("kda").avatarUrl("https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17").status(Artist.ArtistStatus.ACTIVE).build());
 
-        BannerItem b2 = BannerItem.builder()
-                .title("New Releases")
-                .subtitle("Discover brand new albums and singles")
-                .ctaText("Explore")
-                .backgroundImageUrl("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60")
-                .targetType("song")
-                .targetId(5L) // links to "Blinding Lights"
-                .build();
+        downloadSampleMp3();
 
-        bannerRepository.saveAll(List.of(b1, b2));
+        Song s1 = songRepository.save(Song.builder().title("Demo Song 1").slug("demo-song-1")
+                .durationSeconds(210).audioUrl("/api/v1/songs/1/stream")
+                .coverImageUrl("https://images.unsplash.com/photo-1514525253161-7a46d19cd819")
+                .status(Song.SongStatus.PUBLISHED).playCount(1500L).likeCount(120L).build());
+
+        Song s2 = songRepository.save(Song.builder().title("Blinding Lights").slug("blinding-lights")
+                .durationSeconds(200).audioUrl("/api/v1/songs/2/stream")
+                .coverImageUrl("https://images.unsplash.com/photo-1511735111819-9a3f7709049c")
+                .status(Song.SongStatus.PUBLISHED).playCount(98123L).likeCount(5420L).build());
+
+        bannerRepository.save(BannerItem.builder().title("Feel the Beat").subtitle("Trending tracks")
+                .ctaText("Listen Now").backgroundImageUrl("https://images.unsplash.com/photo-1514525253161-7a46d19cd819")
+                .targetType("song").targetId(s1.getId()).build());
+
+        Playlist topTrending = playlistRepository.save(Playlist.builder().title("Top Trending").slug("top-trending")
+                .description("Popular tracks").visibility(Playlist.PlaylistVisibility.PUBLIC)
+                .playlistType(Playlist.PlaylistType.SYSTEM).totalSongs(2).totalDurationSeconds(410L).build());
+
+        playlistSongRepository.save(PlaylistSong.builder().playlistId(topTrending.getId()).songId(s1.getId()).position(1).build());
+        playlistSongRepository.save(PlaylistSong.builder().playlistId(topTrending.getId()).songId(s2.getId()).position(2).build());
 
         System.out.println(">>> Database Seeded Successfully!");
     }
@@ -146,31 +96,20 @@ public class DataSeeder implements CommandLineRunner {
         String dirPath = "data/audio";
         String filePath = dirPath + "/sample.mp3";
         File dir = new File(dirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        if (!dir.exists()) dir.mkdirs();
 
         File file = new File(filePath);
         if (!file.exists()) {
-            System.out.println(">>> Downloading sample MP3 from SoundHelix to local storage...");
             String remoteUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
             try (BufferedInputStream in = new BufferedInputStream(URI.create(remoteUrl).toURL().openStream());
-                 FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-                byte[] dataBuffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+                 FileOutputStream fos = new FileOutputStream(filePath)) {
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = in.read(buffer, 0, 1024)) != -1) {
+                    fos.write(buffer, 0, len);
                 }
-                System.out.println(">>> Download complete. Saved to: " + filePath);
             } catch (IOException e) {
-                System.err.println(">>> Failed to download online sample MP3: " + e.getMessage());
-                // Fallback: Create a tiny dummy file so the application doesn't crash
-                try {
-                    Files.write(Paths.get(filePath), new byte[1024]);
-                    System.out.println(">>> Created dummy fallback MP3 file at: " + filePath);
-                } catch (IOException ioException) {
-                    System.err.println(">>> Critical error: Could not write dummy file: " + ioException.getMessage());
-                }
+                System.err.println(">>> Failed to download MP3 sample: " + e.getMessage());
             }
         }
     }

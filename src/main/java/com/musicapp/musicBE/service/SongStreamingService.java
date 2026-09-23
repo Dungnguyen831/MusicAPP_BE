@@ -9,17 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 @Service
 public class SongStreamingService {
 
-    private static final String AUDIO_PATH = "data/audio/sample.mp3";
-    private static final long CHUNK_SIZE = 1024 * 1024L; // 1 MB chunks for smooth streaming
+    private static final long CHUNK_SIZE = 1024 * 1024L; // 1 MB chunks
 
-    public ResponseEntity<ResourceRegion> streamAudio(String rangeHeader) throws IOException {
-        Resource resource = new FileSystemResource(AUDIO_PATH);
+    public ResponseEntity<ResourceRegion> streamAudio(String filePath, String rangeHeader) throws IOException {
+        Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
-            throw new IOException("Audio file not found at " + AUDIO_PATH);
+            // Fallback to a default sample if specified file not found
+            resource = new FileSystemResource("data/audio/sample.mp3");
+            if (!resource.exists()) {
+                throw new IOException("Audio file not found: " + filePath);
+            }
         }
 
         long contentLength = resource.contentLength();
@@ -27,6 +31,7 @@ public class SongStreamingService {
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                 .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .header("Accept-Ranges", "bytes")
                 .body(region);
     }
 
@@ -48,3 +53,4 @@ public class SongStreamingService {
         }
     }
 }
+
