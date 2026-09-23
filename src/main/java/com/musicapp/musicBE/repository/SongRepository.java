@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> {
-    List<Song> findByIsTrendingTrue();
+    java.util.Optional<Song> findBySlug(String slug);
+    List<Song> findByStatus(Song.SongStatus status);
+    List<Song> findByStatusAndIsDeletedFalseOrderByPlayCountDesc(Song.SongStatus status);
 }

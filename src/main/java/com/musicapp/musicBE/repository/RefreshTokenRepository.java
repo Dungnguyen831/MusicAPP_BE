@@ -1,12 +1,11 @@
 package com.musicapp.musicBE.repository;
 
-import com.musicapp.musicBE.entity.Artist;
+import com.musicapp.musicBE.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ArtistRepository extends JpaRepository<Artist, Long> {
-    Optional<Artist> findBySlug(String slug);
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+    Optional<RefreshToken> findByTokenHash(String tokenHash);
 }
-
