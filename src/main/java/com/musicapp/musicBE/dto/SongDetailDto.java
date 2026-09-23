@@ -32,6 +32,7 @@ public class SongDetailDto {
         private Long id;
         private String name;
         private String slug;
+        private String avatarUrl;
     }
 
     @Data
